@@ -1,0 +1,12 @@
+#include<stdio.h>
+int main()
+{
+    int n=7,fact =1;
+    float sum =0.028;
+    for ( int i=1;i<=n;i++)
+    {
+        fact*=i;
+    }
+    printf(" factorial of percentage %d=%d",n,fact);
+    return 0;
+}
