@@ -1,0 +1,143 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_STUDENTS 100
+#define MAX_NAME_LEN 50
+#define MAX_BLOCKS 5
+#define MAX_DATE_LEN 15
+
+typedef struct {
+    char name[MAX_NAME_LEN];
+    char reg_no[20];
+    char exam_date[MAX_DATE_LEN];
+    char seat[5];
+    char block[10];
+} Student;
+
+// Function to reorder students using "exchange method"
+void exchange_order(Student arr[], int n) {
+    Student temp[MAX_STUDENTS];
+    int left = 0, right = n - 1, idx = 0;
+
+    while (left <= right) {
+        if (idx % 2 == 0) {
+            temp[idx] = arr[left];
+            left++;
+        } else {
+            temp[idx] = arr[right];
+            right--;
+        }
+        idx++;
+    }
+
+    // Copy reordered array back
+    for (int i = 0; i < n; i++) {
+        arr[i] = temp[i];
+    }
+}
+
+int main() {
+    int num_blocks, num_students, total_capacity = 0;
+    int block_rows[MAX_BLOCKS], block_cols[MAX_BLOCKS], block_capacity[MAX_BLOCKS];
+    char block_names[MAX_BLOCKS][10];
+    Student students[MAX_STUDENTS];
+    char row_labels[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    printf("=== Online Exam Seat Allocation System with Exchange Method ===\n");
+
+    printf("Enter number of blocks (enter 1 if only one hall): ");
+    scanf("%d", &num_blocks);
+
+    if (num_blocks > MAX_BLOCKS) {
+        printf("Too many blocks! Maximum allowed is %d.\n", MAX_BLOCKS);
+        return 1;
+    }
+
+    // Input block details
+    for (int b = 0; b < num_blocks; b++) {
+        printf("\nEnter name for Block %d: ", b + 1);
+        scanf("%s", block_names[b]);
+        printf("Enter number of rows in Block %s: ", block_names[b]);
+        scanf("%d", &block_rows[b]);
+        printf("Enter number of columns in Block %s: ", block_names[b]);
+        scanf("%d", &block_cols[b]);
+        block_capacity[b] = block_rows[b] * block_cols[b];
+        total_capacity += block_capacity[b];
+    }
+
+    printf("\nEnter number of students: ");
+    scanf("%d", &num_students);
+    getchar(); // Clear newline after last scanf
+
+    if (num_students > total_capacity) {
+        printf("Not enough seats for all students! Total capacity: %d\n", total_capacity);
+        return 1;
+    }
+
+    // Input student details
+    for (int i = 0; i < num_students; i++) {
+        printf("\nEnter name of student %d: ", i + 1);
+        fgets(students[i].name, MAX_NAME_LEN, stdin);
+        students[i].name[strcspn(students[i].name, "\n")] = '\0';
+
+        printf("Enter register number of student %d: ", i + 1);
+        fgets(students[i].reg_no, 20, stdin);
+        students[i].reg_no[strcspn(students[i].reg_no, "\n")] = '\0';
+
+        printf("Enter exam date for student %d (e.g., 2025-07-10): ", i + 1);
+        fgets(students[i].exam_date, MAX_DATE_LEN, stdin);
+        students[i].exam_date[strcspn(students[i].exam_date, "\n")] = '\0';
+    }
+
+    // Apply exchange (zig-zag) method
+    exchange_order(students, num_students);
+
+    // Seat assignment
+    int student_idx = 0;
+    for (int b = 0; b < num_blocks; b++) {
+        for (int r = 0; r < block_rows[b] && student_idx < num_students; r++) {
+            for (int c = 1; c <= block_cols[b] && student_idx < num_students; c++) {
+                snprintf(students[student_idx].seat, sizeof(students[student_idx].seat), "%c%d", row_labels[r], c);
+                strncpy(students[student_idx].block, block_names[b], sizeof(students[student_idx].block) - 1);
+                students[student_idx].block[sizeof(students[student_idx].block) - 1] = '\0';
+                student_idx++;
+            }
+        }
+    }
+
+    // Display block-wise seating chart
+    printf("\n========== Block-wise Seating Charts ==========\n");
+    for (int b = 0; b < num_blocks; b++) {
+        printf("\nBlock: %s\n", block_names[b]);
+        printf("%-5s %-20s %-15s %-12s\n", "Seat", "Name", "Reg No", "Exam Date");
+        printf("---------------------------------------------------------------\n");
+
+        for (int i = 0; i < num_students; i++) {
+            if (strcmp(students[i].block, block_names[b]) == 0) {
+                printf("%-5s %-20s %-15s %-12s\n", students[i].seat, students[i].name, students[i].reg_no, students[i].exam_date);
+            }
+        }
+    }
+
+    // Save to CSV
+    FILE *fp = fopen("seating_chart.csv", "w");
+    if (fp == NULL) {
+        printf("Error creating CSV file!\n");
+        return 1;
+    }
+
+    fprintf(fp, "Block,Seat,Name,Register Number,Exam Date\n");
+    for (int i = 0; i < num_students; i++) {
+        fprintf(fp, "%s,%s,%s,%s,%s\n",
+                students[i].block,
+                students[i].seat,
+                students[i].name,
+                students[i].reg_no,
+                students[i].exam_date);
+    }
+
+    fclose(fp);
+    printf("\nSeating chart saved to 'seating_chart.csv'\n");
+
+    return 0;
+}
