@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <string.h>
+
+// Function to calculate fare
+int calculateFare(char vehicleType[]) {
+    if (strcmp(vehicleType, "car") == 0)
+        return 50;
+    else if (strcmp(vehicleType, "truck") == 0)
+        return 100;
+    else if (strcmp(vehicleType, "bike") == 0)
+        return 20;
+    else
+        return 0;
+}
+
+int main() {
+    int n, fare;
+    char vehicleNumber[20];
+    char vehicleType[20];
+
+    printf("Enter number of vehicles: ");
+    scanf("%d", &n);
+
+    for (int i = 0; i < n; i++) {
+        printf("\nVehicle %d details:\n", i + 1);
+
+        printf("Enter vehicle number: ");
+        scanf("%s", vehicleNumber);
+
+        printf("Enter vehicle type (car/truck/bike): ");
+        scanf("%s", vehicleType);
+
+        fare = calculateFare(vehicleType);
+
+        if (fare == 0) {
+            printf("Invalid vehicle type. No fare calculated.\n");
+        } else {
+            printf("\n----- Toll Receipt -----\n");
+            printf("Vehicle Number : %s\n", vehicleNumber);
+            printf("Vehicle Type   : %s\n", vehicleType);
+            printf("Toll Fare      : Rs. %d\n", fare);
+            printf("Thank you! Have a safe journey.\n");
+            printf("------------------------\n");
+        }
+    }
+
+    return 0;
+}
